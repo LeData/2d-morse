@@ -39,7 +39,6 @@ function mouseReleased(){
 
 }
 
-
 class Checkpoint {
 
   constructor(plane, tpos) {
