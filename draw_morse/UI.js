@@ -103,7 +103,7 @@ class SwitchBtn extends RectBtn{
   constructor(center_x, center_y, side_x, side_y, on_label, off_label,
                bg_color, over_color,
                pressed_color) {
-    super(center_x, center_y, side_x, side_y, on_label,
+    super(center_x, center_y, side_x, side_y, off_label,
                bg_color, over_color,
                pressed_color)
     this.on = false

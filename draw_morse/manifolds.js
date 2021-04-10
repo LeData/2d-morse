@@ -106,12 +106,14 @@ class KleinBottle extends Manifold{
     console.log("Creating a Klein bottle")
   }
 
-  * get_random_point() {
-    while (true) {
-      let n_1 = this.random_gen.next().value
-      let n_2 = this.random_gen.next().value
-      yield [2 * PI * n_1, 2 * PI * n_2];
-    }
+  get short_name() {
+      return 'Klein'
+  }
+
+  get_random_point() {
+    let n_1 = this.random_gen.next().value
+    let n_2 = this.random_gen.next().value
+    return [2 * PI * n_1, 2 * PI * n_2];
   }
 
   embed(t_1, t_2) {
@@ -132,6 +134,10 @@ class RP2 extends Manifold{
     // The granularity is that of the grid of the manifold maps
     super(granularity)
     console.log("Creating a Projective Plane");
+  }
+
+  get short_name() {
+      return 'RP2'
   }
 
   get_random_point() {
@@ -175,6 +181,10 @@ class Torus extends Manifold{
     // The granularity is that of the grid of the manifold maps
     super(granularity)
     console.log("Creating a Torus")
+  }
+
+  get short_name() {
+      return 'Torus'
   }
 
   get_random_point() {
