@@ -104,16 +104,24 @@ class SwitchBtn extends RectBtn{
                bg_color, over_color,
                pressed_color) {
     super(center_x, center_y, side_x, side_y, on_label,
-               bg_color = [255,255,255], over_color = [40,40,40],
-               pressed_color = [160, 10,70])
+               bg_color, over_color,
+               pressed_color)
     this.on = false
     this.labels = {'on': on_label,
                   'off': off_label}
+    this.available = true
   }
 
+  update(){
+    if(this.pressed && this.available) {
+      this.available = false
+      this.on = !this.on;
+      this.label = this.on ? this.labels['on'] : this.labels['off']
+    }
+  }
 
-  get pressed() {
-    return this.over && mouseIsPressed
+  release() {
+    this.available = true
   }
 }
 
@@ -189,10 +197,14 @@ class DropDown {
     this.options = options
     this.choiceBtns = []
     for (let i = 0; i<this.options.length; i++){
-      this.choiceBtns[i] = (new RectBtn(x, y + i* height, width, height,
-                                       this.options[i]))
+      this.choiceBtns[i] = new RectBtn(x, y + i* height, width, height,
+                                       this.options[i])
     }
     this.opened = false
+  }
+
+  get value() {
+    return this.choiceBtns[0].label
   }
 
   put_first(option) {

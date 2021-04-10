@@ -1,4 +1,9 @@
 // beginning of manifold.js
+
+function dot2(x,y){
+  return x[0]*y[0] + x[1]*y[1] + x[2]*y[2] + x[3]*y[3]
+}
+
 function* infinite_random(grid_size) {
   while (true){
     yield random(grid_size) / grid_size
@@ -29,7 +34,7 @@ class Plane {
 
   project(vector) {
     vector = this.check_dim(vector)
-    return [dot2(this.X, vector), dot2(this.Y, vector)]  
+    return [dot2(this.X, vector), dot2(this.Y, vector)]
   }
 
   shift(dX, dY) {
@@ -45,7 +50,7 @@ class Plane {
 function* linear_plane_transition(starting_plane, ending_plane, steps=30) {
     console.log('initialising transition generator')
     let plane = starting_plane
-    
+
     let dX = []
     for (let i=0; i<ending_plane.X.length; i++) {
       dX[i] = (ending_plane.X[i] - starting_plane.X[i]) / steps;
@@ -66,7 +71,7 @@ class Manifold {
     // The granularity is that of the grid of the manifold maps
     this.random_gen = infinite_random(granularity)
   }
-  
+
   * get_random_point() {
     while (true) {
       let n_1 = this.random_gen.next().value
@@ -74,14 +79,14 @@ class Manifold {
       yield [n_1, n_2];
     }
   }
-  
+
   embed(t_1, t_2) {
     let a = [1,0]
     let b = [0,1];
     let plane = new Plane(a, b)
     return [x, plane];
     }
-  
+
   get_random_projection_onto(plane) {
     let [t_1, t_2] = this.get_random_point();
     let [x, tangent] = this.embed(t_1, t_2);
@@ -90,7 +95,7 @@ class Manifold {
     let det = ((plane.X[0]*tangent.X[0]+plane.X[1]*tangent.X[1]+plane.X[2]*tangent.X[2]+plane.X[3]*tangent.X[3])*(plane.Y[0]*tangent.Y[0]+plane.Y[1]*tangent.Y[1]+plane.Y[2]*tangent.Y[2]+plane.Y[3]*tangent.Y[3])-(plane.X[0]*tangent.Y[0]+plane.X[1]*tangent.Y[1]+plane.X[2]*tangent.Y[2]+plane.X[3]*tangent.Y[3])*(plane.Y[0]*tangent.X[0]+plane.Y[1]*tangent.X[1]+plane.Y[2]*tangent.X[2]+plane.Y[3]*tangent.X[3]));
     return [plane.project(x), det];
   }
-  
+
 }
 
 class KleinBottle extends Manifold{
@@ -122,7 +127,7 @@ class KleinBottle extends Manifold{
 }
 
 class RP2 extends Manifold{
-  
+
   constructor(granularity) {
     // The granularity is that of the grid of the manifold maps
     super(granularity)

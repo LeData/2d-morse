@@ -28,6 +28,96 @@ function dot2(x,y){
   return x[0]*y[0] + x[1]*y[1] + x[2]*y[2] + x[3]*y[3]
 }
 
+class vectorSelector {
+
+  constructor(n_dim, x, y, length, height) {
+    this.sliders = []
+    this.height = 0;
+    this.length = length
+    let spacing = 0.2 * height;
+    for (let i=0; i<n_dim; i++) {
+      this.sliders.push(new Slider(x, y + this.height, length, height))
+      this.height += height
+      if (i!=n_dim) {this.height += spacing}
+    }
+    this.sliders[0].value = 1;
+    this.pressed = false
+  }
+
+  get vector() {
+    let output = []
+    for (let s of this.sliders) {
+      output.push(s.value)
+    }
+    return output
+  }
+
+  display(){
+    for(let s of this.sliders) {
+      s.display()
+    }
+  }
+
+  update(){
+    for (let s of this.sliders) {
+      if (s.pressed) {
+        s.update(true);
+        this.pressed = true;
+        return;
+      }
+    }
+    for(let s of this.sliders) {
+      this.pressed = false
+      s.update();
+    }
+  }
+
+  release(){
+    for(let s of this.sliders) {
+      s.release()
+    }
+  }
+}
+
+class planeSelector {
+
+  constructor(n_dim, x, y, width, height) {
+    let spa = height
+    this._X = new vectorSelector(n_dim, x, y, width, height);
+    this._Y = new vectorSelector(n_dim, x, y + this._X.height + spa, width, height);
+    this.height = this._X.height + this._Y.height + spa
+  }
+
+  get X() {
+    return this._X.vector
+  }
+
+  get Y() {
+    return this._Y.vector
+  }
+
+  display(){
+    this._X.display();
+    this._Y.display();
+  }
+
+  update(){
+    if (!this._Y.pressed && !this._X.pressed) {
+      this._X.update();
+      this._Y.update();
+    }
+    else if (!this._Y.pressed) {this._X.update(); return;}
+    else {this._Y.update(); return;}
+
+  }
+
+  release(){
+    this._X.release();
+    this._Y.release();
+  }
+
+}
+
 
 function mouseReleased(){
   Relez=true;
