@@ -1,17 +1,41 @@
 // beginning of manifold.js
 
+/**
+ * Computes the dot product of two vectors
+ * kept for performance reasons
+ * @param {Vector} x - The first vector
+ * @param {Vector} y - The second vector
+ */
 function dot2(x,y){
-  return x[0]*y[0] + x[1]*y[1] + x[2]*y[2] + x[3]*y[3]
+    product = 0
+    for (i=0; i<x.length(); i++){
+        product += x[i]*y[i]
+    }
+  return product
 }
 
+/**
+ * returns a random number between 0 and 1 with a given resolution
+ * @param {integer} grid_size - size of the grid to use
+ */
 function* infinite_random(grid_size) {
   while (true){
     yield random(grid_size) / grid_size
   }
 }
 
+/**
+ * returns the cartesian coordinates of a point on the the unit circle in R2
+ * @param {float} theta - angle between 0 and 2 pi
+ */
 function S1_point(theta) {
   return [cos(theta), sin(theta)]
+}
+
+function* instant_plane(planesel) {
+  while (true){
+    yield new Plane(planesel.X, planesel.Y)
+  }
 }
 
 class Plane {
@@ -35,6 +59,12 @@ class Plane {
   project(vector) {
     vector = this.check_dim(vector)
     return [dot2(this.X, vector), dot2(this.Y, vector)]
+  }
+
+  dproj(manifold_point) {
+    let det_1 = dot2(this.X, manifold_point.dp.X) * dot2(this.Y,manifold_point.dp.Y);
+    let det_2 = dot2(this.X, manifold_point.dp.Y) * dot2(this.Y, manifold_point.dp.X);
+    return {'p': this.project(manifold_point.p), 'det': det_1 - det_2}
   }
 
   shift(dX, dY) {
@@ -67,9 +97,19 @@ function* linear_plane_transition(starting_plane, ending_plane, steps=30) {
 }
 
 class Manifold {
-  constructor(granularity=10000) {
+  constructor(embedding_size, granularity=10000, density=12000) {
     // The granularity is that of the grid of the manifold maps
+    this.dim = embedding_size;
     this.random_gen = infinite_random(granularity)
+    this.points = null
+    this.density = density
+  }
+
+  check_dim(v) {
+    if (this.dim != v.length) {
+      throw new Error("The vectors doesn't live in the embedding space.");
+    }
+    return v
   }
 
   * get_random_point() {
@@ -80,20 +120,43 @@ class Manifold {
     }
   }
 
+  get_random_grid() {
+    this.points = []
+    for (let i=0; i<this.density; i++) {
+      let [t_1, t_2] = this.get_random_point();
+      this.points.push(this.embed(t_1, t_2))
+    }
+  }
+
+  /**
+  * Returns the list of points of the manifold whose
+  * derivative is below a certain threshold for the passed function.
+  * @param {Function} fct - function applied to the manifold
+  * @param {float} thr - threshold used to find critical_points and values
+  */
   embed(t_1, t_2) {
     let a = [1,0]
     let b = [0,1];
     let plane = new Plane(a, b)
-    return [x, plane];
-    }
+    let x = [t_1, t_2]
+    return {'p': x, 'dp': plane};
+  }
 
-  get_random_projection_onto(plane) {
-    let [t_1, t_2] = this.get_random_point();
-    let [x, tangent] = this.embed(t_1, t_2);
-    // The direct computation above is a few orders of magnitude faster than the one below.
-    // det = dot(u.slice(0,4), a) * dot(u.slice(4),b) - dot(u.slice(0,4), b) * dot(u.slice(4), a);
-    let det = ((plane.X[0]*tangent.X[0]+plane.X[1]*tangent.X[1]+plane.X[2]*tangent.X[2]+plane.X[3]*tangent.X[3])*(plane.Y[0]*tangent.Y[0]+plane.Y[1]*tangent.Y[1]+plane.Y[2]*tangent.Y[2]+plane.Y[3]*tangent.Y[3])-(plane.X[0]*tangent.Y[0]+plane.X[1]*tangent.Y[1]+plane.X[2]*tangent.Y[2]+plane.X[3]*tangent.Y[3])*(plane.Y[0]*tangent.X[0]+plane.Y[1]*tangent.X[1]+plane.Y[2]*tangent.X[2]+plane.Y[3]*tangent.X[3]));
-    return [plane.project(x), det];
+  /**
+  * Returns the list of points of the manifold whose
+  * derivative is below a certain threshold for the passed function.
+  * @param {Function} fct - function applied to the manifold
+  * @param {float} thr - threshold used to find critical_points and values
+  */
+  get_critical_values_of(fct, thr) {
+    let critical_values = []
+    for (let p of this.points) {
+      let d = fct(p)
+      if (d.det < thr) {
+        critical_values.push(d)
+      }
+    }
+    return critical_values
   }
 
 }
@@ -102,7 +165,7 @@ class KleinBottle extends Manifold{
 
   constructor(granularity) {
     // The granularity is that of the grid of the manifold maps
-    super(granularity)
+    super(granularity=granularity, embedding_size=4)
     console.log("Creating a Klein bottle")
   }
 
@@ -116,6 +179,11 @@ class KleinBottle extends Manifold{
     return [2 * PI * n_1, 2 * PI * n_2];
   }
 
+  /**
+  * Returns the coordinates of the embedded point in the embedding space, and a basis for its tangent space.
+  * @param {float} t_1 - first coordinate of the point
+  * @param {float} t_2 - second coordinate of the point
+  */
   embed(t_1, t_2) {
     let X = S1_point(t_1);
     let Y = S1_point(t_2);
@@ -124,7 +192,7 @@ class KleinBottle extends Manifold{
     let a = [-X[1]*Y[0], -X[1]*Y[1], 2*X[0]*DY[0], 2*X[0]*DY[1]];
     let b = [-X[0]*Y[1], X[0]*Y[0], -X[1]*DY[1], X[1]*DY[0]];
     let plane = new Plane(a, b)
-    return [x, plane];
+     return {'p': x, 'dp': plane};
   }
 }
 
@@ -132,7 +200,7 @@ class RP2 extends Manifold{
 
   constructor(granularity) {
     // The granularity is that of the grid of the manifold maps
-    super(granularity)
+    super(granularity=granularity, embedding_size=4)
     console.log("Creating a Projective Plane");
   }
 
@@ -146,40 +214,34 @@ class RP2 extends Manifold{
     return [PI * n_1, -PI/2 + PI * n_2]
   }
 
-  derivate(X) {
+  tangent_basis(X) {
     // This may be a misnomer
     return [X[0] * X[0] - X[1] * X[1], 2 * X[0] * X[1]];
   }
 
+  /**
+  * Returns the coordinates of the embedded point in R^4 and a basis for its tangent space.
+  * @param {float} t_1 - first coordinate of the point
+  * @param {float} t_2 - second coordinate of the point
+  */
   embed(t_1, t_2) {
-     //get the embedded point in R^4 and a basis for the tangent space.
      let X = S1_point(t_1);
      let Y = S1_point(t_2);
-     let DX = this.derivate(X);
-     let DY = this.derivate(Y);
+     let DX = this.tangent_basis(X);
+     let DY = this.tangent_basis(Y);
      let x = [Y[0]*Y[0]*DX[0], Y[0]*Y[0]*DX[1]/2, X[0]*DY[1]/2, X[1]*DY[1]/2];
      let a = [-2*Y[0]*Y[0]*DX[1], Y[0]*Y[0]*DX[0], -X[1]*DY[1], 4*PI*X[0]*DY[1]];
      let b = [DX[0]*DY[1], DX[1]*DY[1]/2, X[0]*DY[0], X[1]*DY[0]];
      let plane = new Plane(a, b)
-     return [x, plane];
+     return {'p': x, 'dp': plane};
    }
-
-  get_random_projection_onto(plane) {
-    let [t_1, t_2] = this.get_random_point();
-    let [x, tangent] = this.embed(t_1, t_2);
-    // The direct computation above is a few orders of magnitude faster than the one below.
-    // det = dot(u.slice(0,4), a) * dot(u.slice(4),b) - dot(u.slice(0,4), b) * dot(u.slice(4), a);
-    let det = ((plane.X[0]*tangent.X[0]+plane.X[1]*tangent.X[1]+plane.X[2]*tangent.X[2]+plane.X[3]*tangent.X[3])*(plane.Y[0]*tangent.Y[0]+plane.Y[1]*tangent.Y[1]+plane.Y[2]*tangent.Y[2]+plane.Y[3]*tangent.Y[3])-(plane.X[0]*tangent.Y[0]+plane.X[1]*tangent.Y[1]+plane.X[2]*tangent.Y[2]+plane.X[3]*tangent.Y[3])*(plane.Y[0]*tangent.X[0]+plane.Y[1]*tangent.X[1]+plane.Y[2]*tangent.X[2]+plane.Y[3]*tangent.X[3]));
-
-    return [plane.project(x), det];
-  }
 }
 
 class Torus extends Manifold{
 
   constructor(granularity) {
     // The granularity is that of the grid of the manifold maps
-    super(granularity)
+    super(granularity=granularity, embedding_size=4)
     console.log("Creating a Torus")
   }
 
@@ -193,6 +255,11 @@ class Torus extends Manifold{
     return [2 * PI * n_1, 2 * PI * n_2];
   }
 
+  /**
+  * Returns the coordinates of the embedded point in R^4 and a basis for its tangent space.
+  * @param {float} t_1 - first coordinate
+  * @param {float} t_2 - second coordinate
+  */
   embed(t_1, t_2) {
     let X = S1_point(t_1);
     let Y = S1_point(t_2);
@@ -200,7 +267,7 @@ class Torus extends Manifold{
     let a = [-X[1], X[0], 0, 0];
     let b = [0, 0, -Y[1], Y[0]];
     let plane = new Plane(a, b)
-    return [x, plane];
+     return {'p': x, 'dp': plane};
   }
 }
 // end of manifold.js
