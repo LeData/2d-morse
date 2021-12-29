@@ -1,16 +1,11 @@
 'use strict';
 
-let numCheckpoints=5;
-let playing=false;      //Store.......
 let w =1300;
 let h=700; //size of the window
 
 let blur=1;
 let ps;
-let mt;
-let sb;
 let mv;
-let sketch_btn;
 let colors={
   'zero': [0,0,0],
   'over': [255, 215, 140],
@@ -40,10 +35,7 @@ function setup() {
   createCanvas(w, h);
   frameRate(30);
   ps = new planeSelector(4, 50, 20, 200, 20);
-  mt = new DropDown(Object.keys(manifolds), 300, 20, 50, 20);
-  sketch_btn = new DropDown(Object.keys(sketches), 350, 20, 50, 20);
-  sb = new SwitchBtn(400, 20, 50, 20, 'Stop','Start', colors['over']);
-  mv = new Movie(manifolds, mt.value, 10000, instant_plane(ps), sketches, sketch_btn.value)
+  mv = new Movie(manifolds, Torus, 10000, instant_plane(ps), sketches, 'squares')
 }
 
 function draw() {
@@ -52,18 +44,10 @@ function draw() {
 
   // updating the UI
   ps.update();
-  mt.update();
   sketch_btn.update()
   mv.update(mt.value, sketch_btn.value)
 
-  if (playing) {
-    mv.draw(30)
-  }
-  sb.update();
-
+  mv.draw(30)
   // displaying
   ps.display();
-  mt.display();
-  sb.display();
-  sketch_btn.display()
 }
