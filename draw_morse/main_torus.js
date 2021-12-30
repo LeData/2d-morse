@@ -35,7 +35,7 @@ function setup() {
   createCanvas(w, h);
   frameRate(30);
   ps = new planeSelector(4, 50, 20, 200, 20);
-  mv = new Movie(manifolds, Torus, 10000, instant_plane(ps), sketches, 'squares')
+  mv = new Movie(manifolds, Torus.short_name, 10000, instant_plane(ps), sketches, 'squares')
 }
 
 function draw() {

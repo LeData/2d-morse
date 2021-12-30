@@ -111,7 +111,7 @@ class planeSelector {
 
 class Movie {
 
-  constructor(manifolds, manifold = 'Torus'ddw, frame_generator, sketches, sketch){
+  constructor(manifolds, manifold = 'Torus', frame_generator, sketches, sketch){
     console.log("Initiating movie")
     this.frame_generator = frame_generator
     this.manifolds = manifolds
