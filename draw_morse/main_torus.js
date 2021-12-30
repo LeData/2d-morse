@@ -14,16 +14,7 @@ let colors={
   'start': [30,20,50]
   };
 
-/**
-* Defining the option bindings for buttons
-*/
-let manifolds = {}
-for (let o of [RP2, Torus, KleinBottle]) {
-  manifolds[new o().short_name] = o
-}
 
-let sketches = {'squares': plot_squares,
-                'lines': plot_lines}
 
 // general mouse release funtion
 function mouseReleased(){

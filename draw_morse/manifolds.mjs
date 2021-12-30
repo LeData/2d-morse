@@ -3,12 +3,12 @@
 /**
  * Computes the dot product of two vectors
  * kept for performance reasons
- * @param {Vector} x - The first vector
- * @param {Vector} y - The second vector
+ * @param {nVector} x - The first vector
+ * @param {nVector} y - The second vector
  */
 function dot2(x,y){
-    product = 0
-    for (i=0; i<x.length(); i++){
+    let product = 0
+    for (let i=0; i<x.length(); i++){
         product += x[i]*y[i]
     }
   return product
@@ -16,7 +16,7 @@ function dot2(x,y){
 
 /**
  * returns a random number between 0 and 1 with a given resolution
- * @param {integer} grid_size - size of the grid to use
+ * @param {int} grid_size - size of the grid to use
  */
 function* infinite_random(grid_size) {
   while (true){
@@ -129,11 +129,10 @@ class Manifold {
   }
 
   /**
-  * Returns the list of points of the manifold whose
-  * derivative is below a certain threshold for the passed function.
-  * @param {Function} fct - function applied to the manifold
-  * @param {float} thr - threshold used to find critical_points and values
-  */
+   * Returns the coordinates of the embedded point in the embedding space, and a basis for its tangent space.
+   * @param {float} t_1 - first coordinate of the point
+   * @param {float} t_2 - second coordinate of the point
+   */
   embed(t_1, t_2) {
     let a = [1,0]
     let b = [0,1];
@@ -161,11 +160,11 @@ class Manifold {
 
 }
 
-class KleinBottle extends Manifold{
+export class KleinBottle extends Manifold{
 
   constructor(granularity) {
     // The granularity is that of the grid of the manifold maps
-    super(granularity=granularity, embedding_size=4)
+    super(4, granularity)
     console.log("Creating a Klein bottle")
   }
 
@@ -196,7 +195,7 @@ class KleinBottle extends Manifold{
   }
 }
 
-class RP2 extends Manifold{
+export class RP2 extends Manifold{
 
   constructor(granularity) {
     // The granularity is that of the grid of the manifold maps
@@ -237,7 +236,7 @@ class RP2 extends Manifold{
    }
 }
 
-class Torus extends Manifold{
+export class Torus extends Manifold{
 
   constructor(granularity) {
     // The granularity is that of the grid of the manifold maps

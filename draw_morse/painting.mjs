@@ -1,5 +1,5 @@
-// beginning of painting.js
-function plot_lines(point_list, connectionRadius=0.4) {
+// beginning of painting.mjs
+export function plot_lines(point_list, connectionRadius=0.4) {
     let lineWeight = 1;
     push();
     strokeWeight(lineWeight);
@@ -31,7 +31,7 @@ function plot_lines(point_list, connectionRadius=0.4) {
  * @param {Vector} x - The first vector
  * @param {Vector} y - The second vector
  */
-function plot_squares(point_list) {
+export function plot_squares(point_list) {
     let s_ratio = 3;
     translate(windowWidth / 2, windowHeight / 2);
     let scale = 300;
@@ -48,4 +48,4 @@ function plot_squares(point_list) {
       }
   }
 
-// end of painting.js
+// end of painting.mjs

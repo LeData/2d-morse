@@ -1,8 +1,9 @@
+// noinspection EqualityComparisonWithCoercionJS
 (function () {
     function nVector() {
         //nVector is a constructor function which creates an object with x,y,z, then alphabetically named properties.
-        var obj = {};
-        for (var i = 0; i < arguments.length; i++) {
+        let obj = {};
+        for (let i = 0; i < arguments.length; i++) {
             if (i > dimensionalSymbols.length) {
                 throw "P5JS ERROR: Too many dimensions were entered!";
             }
@@ -10,17 +11,15 @@
         }
         return generateMethods(obj);
     }
-    ;
     p5.prototype.nVector = nVector;
-    ;
     function nMatrix(size, input) {
         // constructor function for a matrix. fills in a
-        var output = {};
+        let output = {};
         output.size = size;
         output.data = [];
-        for (var i = 0; i < size[1]; i++) {
+        for (let i = 0; i < size[1]; i++) {
             output.data[i] = [];
-            for (var j = 0; j < size[0]; j++) {
+            for (let j = 0; j < size[0]; j++) {
                 output.data[i][j] = input[(i * size[0]) + j];
             }
         }
@@ -33,10 +32,10 @@
                 throw "Vector is wrong size for this matrix";
             }
             else {
-                var multipliedVector = {};
-                for (var i = 0; i < vector.dimension(); i++) {
+                let multipliedVector = {};
+                for (let i = 0; i < vector.dimension(); i++) {
                     multipliedVector[dimensionalSymbols[i]] = 0;
-                    for (var j = 0; j < vector.dimension(); j++) {
+                    for (let j = 0; j < vector.dimension(); j++) {
                         multipliedVector[dimensionalSymbols[i]] += Number(output.data[i][j] * vector[dimensionalSymbols[j]]);
                     }
                 }
@@ -45,14 +44,13 @@
         };
         return output;
     }
-    ;
     p5.prototype.nMatrix = nMatrix;
     function perspectiveProjectionMatrix(vector, shift) {
-        var workingVector = vector.nPush(1);
+        let workingVector = vector.nPush(1);
         function createMatrixString(dimension) {
-            var outputString = "[";
-            for (var i = 0; i < dimension; i++) {
-                for (var j = 0; j < dimension; j++) {
+            let outputString = "[";
+            for (let i = 0; i < dimension; i++) {
+                for (let j = 0; j < dimension; j++) {
                     if (i == j) {
                         outputString += "1,";
                     }
@@ -62,7 +60,7 @@
                 }
                 outputString += "0,";
             }
-            for (var k = 0; k <= dimension; k++) {
+            for (let k = 0; k <= dimension; k++) {
                 if (k == dimension - 1) {
                     outputString += "1,";
                 }
@@ -76,24 +74,23 @@
             outputString += "]";
             return outputString;
         }
-        var matrixString = createMatrixString(vector.dimension());
-        var matrixSize = vector.dimension() + 1;
-        var projectionMatrix = nMatrix([matrixSize, matrixSize], eval(matrixString));
-        var multipliedVector = projectionMatrix.multiply(workingVector);
+        let matrixString = createMatrixString(vector.dimension());
+        let matrixSize = vector.dimension() + 1;
+        let projectionMatrix = nMatrix([matrixSize, matrixSize], eval(matrixString));
+        let multipliedVector = projectionMatrix.multiply(workingVector);
         multipliedVector = multipliedVector.nDiv(multipliedVector[dimensionalSymbols[vector.dimension()]]);
-        var output = multipliedVector.nPop(2);
+        let output = multipliedVector.nPop(2);
         return output;
     }
     p5.prototype.perspectiveProjectionMatrix = perspectiveProjectionMatrix;
-    var dimensionalSymbols = ["x", "y", "z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w",
+    let dimensionalSymbols = ["x", "y", "z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w",
         "xx", "yy", "zz", "aa", "bb", "cc", "dd", "ee", "ff", "gg", "hh", "ii", "jj", "kk", "ll", "mm", "nn", "oo", "pp", "qq", "rr", "ss", "tt", "uu", "vv", "ww"
     ];
     function getVectorValues(vector) {
-        var output = Object.keys(vector).filter(function (i) { return dimensionalSymbols.includes(i); }); //filters values
+        let output = Object.keys(vector).filter(function (i) { return dimensionalSymbols.includes(i); }); //filters values
         output = output.map(function (v) { return vector[v]; }); //turns v1's values into an array
         return output;
     }
-    ;
     function generateMethods(vector) {
         vector.nDist = function (v2) { return nDist(this, v2); };
         vector.nDistSq = function (v2) { return nDistSq(this, v2); };
@@ -110,18 +107,18 @@
         vector.nMag = function () { return nMag(this); };
         vector.nMagSq = function () { return nMagSq(this); };
         vector.nPush = function (number) {
-            var output = {};
-            var dimension = getVectorValues(this).length;
-            for (var i = 0; i < dimension; i++) {
+            let output = {};
+            let dimension = getVectorValues(this).length;
+            for (let i = 0; i < dimension; i++) {
                 output[dimensionalSymbols[i]] = this[dimensionalSymbols[i]];
             }
             output[dimensionalSymbols[dimension]] = number;
             return generateMethods(output);
         };
         vector.nPop = function (number) {
-            var output = {};
-            var dimension = getVectorValues(this).length;
-            for (var i = 0; i < dimension - number; i++) {
+            let output = {};
+            let dimension = getVectorValues(this).length;
+            for (let i = 0; i < dimension - number; i++) {
                 output[dimensionalSymbols[i]] = this[dimensionalSymbols[i]];
             }
             return generateMethods(output);
@@ -131,51 +128,46 @@
         };
         return vector;
     }
-    ;
     function nDist(v1, v2) {
         //nDist calculates the euclidean distance between two points(nVector objects), or between 'this' and another point.
         return Math.sqrt(nDistSq(v1, v2));
     }
-    ;
     p5.prototype.nDist = nDist;
     function nDistSq(v1, v2) {
         //nDist calculates the euclidean distance between two points(nVector objects), or between 'this' and another point.
-        var positions = [];
-        var a1 = getVectorValues(v1);
-        var a2 = getVectorValues(v2);
+        let positions = [];
+        let a1 = getVectorValues(v1);
+        let a2 = getVectorValues(v2);
         positions = a1.concat(a2); //Joins arrays together
-        var total = 0;
-        for (var i = 0; i < positions.length / 2; i++) {
+        let total = 0;
+        for (let i = 0; i < positions.length / 2; i++) {
             total += Math.pow(positions[i] - positions[i + positions.length / 2], 2);
         }
         return total;
     }
-    ;
     p5.prototype.nDistSq = nDistSq;
     function nRandomVector(d, min, max) {
-        var obj = {};
-        for (var i = 0; i < d; i++) {
+        let obj = {};
+        for (let i = 0; i < d; i++) {
             obj[dimensionalSymbols[i]] = Math.round(Math.random() * (max - min) + min);
         }
         return generateMethods(obj);
     }
-    ;
     p5.prototype.nRandomVector = nRandomVector;
     function nDot(v1, v2) {
         //implement dot product - which is equal to v1.x * v2.x + v1.y * v2.y ...
-        var output = 0;
-        var dimensionCount = getVectorValues(v1).length;
-        for (var i = 0; i < dimensionCount; i++) {
+        let output = 0;
+        let dimensionCount = getVectorValues(v1).length;
+        for (let i = 0; i < dimensionCount; i++) {
             output += v1[dimensionalSymbols[i]] * v2[dimensionalSymbols[i]];
         }
         return output;
     }
-    ;
     p5.prototype.nDot = nDot;
     // p5.prototype.nCross = function(v1, v2) { // Returns cross of two vectors
-    //     var output:nVector;
-    //     var v1Values = getVectorValues(v1)
-    //     var v2Values = getVectorValues(v2)
+    //     let output:nVector;
+    //     let v1Values = getVectorValues(v1)
+    //     let v2Values = getVectorValues(v2)
     //     if (v1Values.length != 3 || v2Values.length != 3) { // Checks if both vectors are 3 dimensional
     //         throw "P5JS ERROR: Vectors must be 3 dimensional!";
     //     } else {
@@ -187,13 +179,13 @@
     //     return generateMethods(output); //Returns vector
     // }
     function nEqual(v1, v2) {
-        var values1 = getVectorValues(v1);
-        var values2 = getVectorValues(v2);
+        let values1 = getVectorValues(v1);
+        let values2 = getVectorValues(v2);
         if (values1.length != values2.length) {
             return false;
         }
         else {
-            for (var i = 0; i < values1.length; i++) {
+            for (let i = 0; i < values1.length; i++) {
                 if (values1[i] != values2[i]) {
                     return false;
                 }
@@ -201,107 +193,96 @@
             return true;
         }
     }
-    ;
     p5.prototype.nEqual = nEqual;
     function nNormalize(v1) {
-        var obj = {};
-        for (var i = 0; i < getVectorValues(v1).length; i++) {
+        let obj = {};
+        for (let i = 0; i < getVectorValues(v1).length; i++) {
             obj[dimensionalSymbols[i]] = v1[dimensionalSymbols[i]] / nMag(v1);
         }
         return generateMethods(obj);
     }
-    ;
     p5.prototype.nNormalize = nNormalize;
     function nSetMag(v1, n) {
-        var output = nNormalize(v1);
-        for (var i = 0; i < getVectorValues(v1).length; i++) {
+        let output = nNormalize(v1);
+        for (let i = 0; i < getVectorValues(v1).length; i++) {
             output[dimensionalSymbols[i]] = output[dimensionalSymbols[i]] * n;
         }
         return output;
     }
-    ;
     p5.prototype.nSetMag = nSetMag;
     function nLimit(v1, n) {
-        var output = v1;
+        let output = v1;
         if (nMagSq(v1) > n * n) {
             output = nSetMag(v1, n);
         }
         return output;
     }
-    ;
     p5.prototype.nLimit = nLimit;
     function nArray(v1) {
-        var output = [];
-        for (var i = 0; i < getVectorValues(v1).length; i++) {
+        let output = [];
+        for (let i = 0; i < getVectorValues(v1).length; i++) {
             output[i] = v1[dimensionalSymbols[i]];
         }
         return output;
     }
-    ;
     p5.prototype.nArray = nArray;
     function nAdd(v1, v2) {
         //implement add of nVectors
-        var output = {};
-        var dimensionCount = getVectorValues(v1).length;
-        for (var i = 0; i < dimensionCount; i++) {
+        let output = {};
+        let dimensionCount = getVectorValues(v1).length;
+        for (let i = 0; i < dimensionCount; i++) {
             output[dimensionalSymbols[i]] = v1[dimensionalSymbols[i]] + v2[dimensionalSymbols[i]];
         }
         return generateMethods(output);
     }
-    ;
     p5.prototype.nAdd = nAdd;
     function nSub(v1, v2) {
         //implement subtraction of nVectors
-        var output = {};
-        var dimensionCount = getVectorValues(v1).length;
-        for (var i = 0; i < dimensionCount; i++) {
+        let output = {};
+        let dimensionCount = getVectorValues(v1).length;
+        for (let i = 0; i < dimensionCount; i++) {
             output[dimensionalSymbols[i]] = v1[dimensionalSymbols[i]] - v2[dimensionalSymbols[i]];
         }
         return generateMethods(output);
     }
-    ;
     p5.prototype.nSub = nSub;
     function nMul(v, n) {
-        var output = {};
-        var values = getVectorValues(v);
-        for (var i = 0; i < values.length; i++) {
+        let output = {};
+        let values = getVectorValues(v);
+        for (let i = 0; i < values.length; i++) {
             output[dimensionalSymbols[i]] = values[i] * n;
         }
         return generateMethods(output); //Returns vector
     }
-    ;
     p5.prototype.nMul = nMul;
     function nDiv(v, n) {
-        var output = {};
-        var values = getVectorValues(v);
-        for (var i = 0; i < values.length; i++) {
+        let output = {};
+        let values = getVectorValues(v);
+        for (let i = 0; i < values.length; i++) {
             output[dimensionalSymbols[i]] = values[i] / n;
         }
         return generateMethods(output);
     }
-    ;
     p5.prototype.nDiv = nDiv;
     function nMag(v1) {
         //implement magnitude calculation of nVectors
-        var dimensionCount = getVectorValues(v1).length;
-        var origin = {};
-        for (var i = 0; i < dimensionCount; i++) {
+        let dimensionCount = getVectorValues(v1).length;
+        let origin = {};
+        for (let i = 0; i < dimensionCount; i++) {
             origin[dimensionalSymbols[i]] = 0;
         }
         return nDist(origin, v1);
     }
-    ;
     p5.prototype.nMag = nMag;
     function nMagSq(v1) {
         //implement magnitude calculation of nVectors
-        var dimensionCount = getVectorValues(v1).length;
-        var origin = {};
-        for (var i = 0; i < dimensionCount; i++) {
+        let dimensionCount = getVectorValues(v1).length;
+        let origin = {};
+        for (let i = 0; i < dimensionCount; i++) {
             origin[dimensionalSymbols[i]] = 0;
         }
         return nDistSq(origin, v1);
     }
-    ;
     p5.prototype.nMagSq = nMagSq;
     function nLerp(v1, v2, percentage) {
         //linear interpolation between two vectors by percentage amount
@@ -313,19 +294,18 @@
                 percentage = 1;
                 break;
         }
-        var dimensionCount = getVectorValues(v1).length;
-        var output = {};
-        for (var i = 0; i < dimensionCount; i++) {
+        let dimensionCount = getVectorValues(v1).length;
+        let output = {};
+        for (let i = 0; i < dimensionCount; i++) {
             output[dimensionalSymbols[i]] = v1[dimensionalSymbols[i]] + ((v2[dimensionalSymbols[i]] - v1[dimensionalSymbols[i]]) * percentage);
         }
         return generateMethods(output);
     }
-    ;
     p5.prototype.nLerp = nLerp;
     function nObject(objectData) {
         //nObject is a constructor function for an object with nDimensional verticies, edges and faces.
         // objectData must be an object with properties as follows: dimension: integer, vertices: nVector, edges, array[2], faces: array[3]
-        var obj;
+        let obj;
         if (arguments.length == 1) {
             if (objectData.dimension > dimensionalSymbols.length) {
                 throw "P5JS ERROR: Dimension of object is too high!";
@@ -343,22 +323,20 @@
         }
         return obj;
     }
-    ;
     p5.prototype.nObject = nObject;
     function nShift(object, forces) {
         if (forces.length != object.dimension) {
             throw "P5JS ERROR: You have too many dimensional movements!";
         }
         else {
-            for (var n = 0; n < object.vertices.length; n++) {
-                for (var i = 0; i < forces.length; i++) {
+            for (let n = 0; n < object.vertices.length; n++) {
+                for (let i = 0; i < forces.length; i++) {
                     object.vertices[n][dimensionalSymbols[i]] += forces[i];
                 }
             }
         }
         return object;
     }
-    ;
     p5.prototype.nShift = nShift;
 })();
-//# sourceMappingURL=p5.dimensions.js.map
+//# sourceMappingURL=p5.dimensions.mjs.map
